@@ -1,6 +1,8 @@
 import pygame
 
 class GameEngine(object):
+    DEFAULT_FRAMES_PER_SECOND = 60
+    
     def __init__(self, screen, event_checker):
         self.event_checker = event_checker
         self.entities = []
@@ -10,18 +12,28 @@ class GameEngine(object):
         self.screen_rect = screen.get_rect()
 
     def start(self):
+        self._do_loop()
+
+    def _do_loop(self):
         self.alive = True
+
+        clock = pygame.time.Clock()
         while self.alive:
-            self.event_checker.check()
-            self.do_events(self.event_checker)
+            ms = clock.tick(self.get_target_frames_per_second())
+            self._do_frame(ms)
 
-            # An event might want to trigger the end of the loop
-            if not self.alive:
-                break
+    # Do one frame
+    def _do_frame(self, ms):
+        self.event_checker.check()
+        self.do_events(self.event_checker)
 
-            self.do_update()
-            self.do_entity_cleanup()
-            self.do_draw()
+        # An event might want to trigger the end of the loop
+        if not self.alive:
+            return
+
+        self.do_update()
+        self.do_entity_cleanup()
+        self.do_draw()
 
     def do_events(self, event_checker):
         if self.event_checker.quit:
@@ -54,3 +66,7 @@ class GameEngine(object):
             self.screen.blit(e.get_image(), e.rect)
     
         pygame.display.flip()
+
+    def get_target_frames_per_second(self):
+        return self.DEFAULT_FRAMES_PER_SECOND
+    

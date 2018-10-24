@@ -1,7 +1,7 @@
 import sys, pygame
 from tank_game_engine import TankGameEngine
 
-pygame.init()
+pygame.display.init()
 
 #
 # Game 

@@ -40,5 +40,8 @@ class TankGameEventChecker(object):
                 if event.key == pygame.K_SPACE:
                     self.shooting = True
 
+                if event.key == pygame.K_ESCAPE:
+                    self.quit = True
+
 
         
