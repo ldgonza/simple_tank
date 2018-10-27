@@ -6,7 +6,7 @@ from bullet import Bullet
 from constants import *
 
 class TankGameEngine(GameEngine):
-    MAX_BULLETS = 1
+    MAX_BULLETS = 3
 
     def __init__(self, screen):
         GameEngine.__init__(self, screen, TankGameEventChecker())
