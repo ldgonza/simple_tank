@@ -1,0 +1,3 @@
+PLAYER = "PLAYER"
+BULLET = "BULLET"
+

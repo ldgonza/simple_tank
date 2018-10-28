@@ -3,7 +3,7 @@ from tank_game_event_checker import TankGameEventChecker
 from tank import Tank
 from bullet import Bullet
 
-from constants import *
+from tank_game_categories import *
 
 class TankGameEngine(GameEngine):
     MAX_BULLETS = 3
@@ -11,28 +11,38 @@ class TankGameEngine(GameEngine):
     def __init__(self, screen):
         GameEngine.__init__(self, screen, TankGameEventChecker())
 
-        self.tank = Tank()
-        self.tank.place_at((400, 300))
-        self.entities = [self.tank]
-    
-    #
-    # Awful way to know how many bullets there are:
-    # len(entities) - 1
-    #
+        tank = Tank()
+        tank.categories.append(PLAYER)
+        tank.place_at((400, 300))
+
+        self.entities.append(tank)
+
     def bullet_count(self):
-        return len(self.entities) - 1
+        count = 0
+        for e in self.entities.all():
+            if BULLET in e.categories: count += 1
+
+        return count;
 
     def do_events(self, event_checker):
         GameEngine.do_events(self, event_checker)
         
         if event_checker.direction is None:
-            self.tank.stop()
+            self.get_player().stop()
         else:
-            self.tank.turn_to(event_checker.direction)
+            self.get_player().turn_to(event_checker.direction)
 
         if self.event_checker.shooting and self.bullet_count() < TankGameEngine.MAX_BULLETS:
             bullet = Bullet()
-            bullet.place_at(self.tank.rect.center)
-            bullet.turn_to(self.tank.direction)
+            bullet.categories.append(BULLET)
+            bullet.place_at(self.get_player().rect.center)
+            bullet.turn_to(self.get_player().direction)
 
             self.entities.append(bullet)
+
+    def get_player(self):
+        for e in self.entities.all():
+            if PLAYER in e.categories: return e
+        
+
+    

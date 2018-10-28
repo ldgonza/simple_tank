@@ -1,11 +1,12 @@
 import pygame
+from thing_list import ThingList
 
 class GameEngine(object):
     DEFAULT_FRAMES_PER_SECOND = 60
     
     def __init__(self, screen, event_checker):
         self.event_checker = event_checker
-        self.entities = []
+        self.entities = ThingList()
         self.alive = False
 
         self.screen = screen
@@ -32,7 +33,6 @@ class GameEngine(object):
             return
 
         self.do_update()
-        self.do_entity_cleanup()
         self.do_draw()
 
     def do_events(self, event_checker):
@@ -41,28 +41,19 @@ class GameEngine(object):
             
     def do_update(self):
         # Move
-        for e in self.entities:
+        for e in self.entities.all():
             e.move()
         
         # Dispatch events to entities
         # like collisions or out of bounds
-        for e in self.entities:
+        for e in self.entities.all():
             if not self.screen_rect.contains(e.rect):
                 e.handle_out_of_bounds(self.screen_rect)
                 
-    def do_entity_cleanup(self):
-        # Cleanup of dead entities
-        
-        old_entities = self.entities[:]
-        self.entities = []
-        for e in old_entities:
-            if e.is_alive():
-                self.entities.append(e)
-
     def do_draw(self):
         self.screen.fill((0,0,0))
 
-        for e in self.entities:
+        for e in self.entities.all():
             self.screen.blit(e.get_image(), e.rect)
     
         pygame.display.flip()

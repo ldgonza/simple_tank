@@ -16,6 +16,7 @@ class Thing(object):
         self.speed = None
         self.direction = None
         self.rect = pygame.Rect(0, 0, 0, 0)
+        self.categories = list()
         
         self.place_at((0, 0))
         self.turn_to(UP)
