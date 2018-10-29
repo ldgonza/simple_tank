@@ -1,10 +1,11 @@
 import pygame
-from thing import Thing
-from constants import *
+import os
+from .engine.thing import Thing
+from .engine.constants import *
 
 class Tank(Thing):
     rotations = dict()
-    rotations[UP] = pygame.image.load("tank.gif")
+    rotations[UP] = pygame.image.load(os.path.dirname(__file__) + "/tank.gif")
     rotations[LEFT] = pygame.transform.rotate(rotations[UP], 90)
     rotations[DOWN] = pygame.transform.rotate(rotations[UP], 180)
     rotations[RIGHT] = pygame.transform.rotate(rotations[UP], 270)
