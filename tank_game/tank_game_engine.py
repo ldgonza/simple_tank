@@ -1,4 +1,4 @@
-from game_engine import GameEngine
+from .engine.game_engine import GameEngine
 from tank_game_event_checker import TankGameEventChecker
 from tank import Tank
 from bullet import Bullet

@@ -1,6 +1,6 @@
 import pygame
-from thing import Thing
-from constants import *
+from .engine.thing import Thing
+from .engine.constants import *
 
 class Bullet(Thing):
     image = pygame.Surface((10,10))

@@ -1,5 +1,5 @@
 import pygame
-from constants import *
+from engine.constants import *
 
 class TankGameEventChecker(object):
     def __init__(self):
