@@ -70,3 +70,26 @@ class GameEngine(object):
 
     def get_target_frames_per_second(self):
         return self.DEFAULT_FRAMES_PER_SECOND
+
+    def entities_by_category(self, cat):
+        result = list()
+        for e in self.entities.all():
+            if cat in e.categories:
+                result.append(e)
+
+        return result
+
+    # Return entities that collide
+    # in pair (e1, e2)
+    # where e1 belongs to cat1 and e2 belongs to cat2
+    def detect_collisions(self, cat1, cat2):
+        collisions = list()
+        for e1 in self.entities_by_category(cat1):
+            for e2 in self.entities_by_category(cat2):
+                if e1 is e2:
+                    continue
+
+                if e1.rect.colliderect(e2.rect):
+                    collisions.append((e1, e2))
+
+        return collisions
