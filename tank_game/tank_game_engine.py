@@ -1,5 +1,6 @@
 from .engine.game_engine import GameEngine
 from .engine.event_ticker import EventTicker
+from .engine.constants import UP, DOWN, LEFT, RIGHT
 from tank_game_event_checker import TankGameEventChecker
 from tank import Tank
 from bullet import Bullet
@@ -17,7 +18,7 @@ class TankGameEngine(GameEngine):
         tank = self.add_tank((400, 300))
         tank.categories.append(PLAYER)
 
-        ticker = EventTicker(1000, lambda: self.do_spawn_tank())
+        ticker = EventTicker(1000, lambda: self.spawn_tank_controller())
         self.spawn_tank_ticker = ticker
         self.add_ticker(ticker)
 
@@ -58,10 +59,28 @@ class TankGameEngine(GameEngine):
         if self.can_shoot():
             bullet = Bullet()
             bullet.categories.append(BULLET)
-            bullet.place_at(self.get_player().rect.center)
+
+            pos = self.get_player().rect.center
+            delta = 30
+
+            if(self.get_player().direction == LEFT):
+                pos = (pos[0] - delta, pos[1])
+
+            if(self.get_player().direction == RIGHT):
+                pos = (pos[0] + delta, pos[1])
+
+            if(self.get_player().direction == UP):
+                pos = (pos[0], pos[1] - delta)
+
+            if(self.get_player().direction == DOWN):
+                pos = (pos[0], pos[1] + delta)
+
+            bullet.place_at(pos)
             bullet.turn_to(self.get_player().direction)
 
             self.entities.append(bullet)
+
+        self.check_collisions()
 
     def get_player(self):
         for e in self.entities.all():
@@ -84,6 +103,16 @@ class TankGameEngine(GameEngine):
         if self.tank_count() < TankGameEngine.MAX_TANKS:
             self.add_tank(self.get_random_pos())
 
-    def do_spawn_tank(self):
+    def spawn_tank_controller(self):
         self.spawn_tank()
         self.spawn_tank_ticker.reset(random.uniform(500, 1500))
+
+    def check_collisions(self):
+        bullet_and_tank = self.detect_collisions(BULLET, TANK)
+
+        for c in bullet_and_tank:
+            bullet = c[0]
+            tank = c[1]
+
+            bullet.die()
+            tank.die()
