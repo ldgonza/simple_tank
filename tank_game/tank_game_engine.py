@@ -17,7 +17,7 @@ class TankGameEngine(GameEngine):
         tank = self.add_tank((400, 300))
         tank.categories.append(PLAYER)
 
-        ticker = EventTicker(1000, lambda: self.do_spawn_tank())
+        ticker = EventTicker(1000, lambda: self.spawn_tank_controller())
         self.spawn_tank_ticker = ticker
         self.add_ticker(ticker)
 
@@ -84,6 +84,6 @@ class TankGameEngine(GameEngine):
         if self.tank_count() < TankGameEngine.MAX_TANKS:
             self.add_tank(self.get_random_pos())
 
-    def do_spawn_tank(self):
+    def spawn_tank_controller(self):
         self.spawn_tank()
         self.spawn_tank_ticker.reset(random.uniform(500, 1500))
