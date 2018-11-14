@@ -13,13 +13,14 @@ class Thing(object):
 
     def __init__(self):
         self.alive = True
-        self.speed = None
         self.direction = None
         self.rect = pygame.Rect(0, 0, 0, 0)
         self.categories = list()
         
         self.place_at((0, 0))
         self.turn_to(UP)
+        self.speed = None
+        
 
     def place_at(self, center):
         self.rect.center = center
@@ -39,11 +40,14 @@ class Thing(object):
         self.speed = Thing.speeds[self.direction]
     
     def move(self):
+        if self.speed is None:
+            return
+
         self.pos = self.pos[0] +  self.speed[0], self.pos[1] + self.speed[1]
         self.rect.center = int(self.pos[0]), int(self.pos[1])
-        
+
     def get_image(self):
         pass
-        
+
     def handle_out_of_bounds(self, screen_rect):
         pass
