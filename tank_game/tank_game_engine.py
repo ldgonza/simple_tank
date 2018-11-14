@@ -1,4 +1,5 @@
 from .engine.game_engine import GameEngine
+from .engine.event_ticker import EventTicker
 from tank_game_event_checker import TankGameEventChecker
 from tank import Tank
 from bullet import Bullet
@@ -15,6 +16,10 @@ class TankGameEngine(GameEngine):
 
         tank = self.add_tank((400, 300))
         tank.categories.append(PLAYER)
+
+        ticker = EventTicker(1000, lambda: self.do_spawn_tank())
+        self.spawn_tank_ticker = ticker
+        self.add_ticker(ticker)
 
     def bullet_count(self):
         return self.count(BULLET)
@@ -58,8 +63,6 @@ class TankGameEngine(GameEngine):
 
             self.entities.append(bullet)
 
-        self.spawn_tank()
-
     def get_player(self):
         for e in self.entities.all():
             if PLAYER in e.categories:
@@ -80,3 +83,7 @@ class TankGameEngine(GameEngine):
     def spawn_tank(self):
         if self.tank_count() < TankGameEngine.MAX_TANKS:
             self.add_tank(self.get_random_pos())
+
+    def do_spawn_tank(self):
+        self.spawn_tank()
+        self.spawn_tank_ticker.reset(random.uniform(500, 1500))
