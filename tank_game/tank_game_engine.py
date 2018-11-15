@@ -82,6 +82,11 @@ class TankGameEngine(GameEngine):
 
         self.check_collisions()
 
+        # Game over
+        if self.get_player() is None:
+            print("GAME OVER")
+            self.alive = False
+
     def get_player(self):
         for e in self.entities.all():
             if PLAYER in e.categories:
@@ -108,6 +113,10 @@ class TankGameEngine(GameEngine):
         self.spawn_tank_ticker.reset(random.uniform(500, 1500))
 
     def check_collisions(self):
+        self.check_bullet_collisions()
+        self.check_tank_collisions()
+
+    def check_bullet_collisions(self):
         bullet_and_tank = self.detect_collisions(BULLET, TANK)
 
         for c in bullet_and_tank:
@@ -116,3 +125,12 @@ class TankGameEngine(GameEngine):
 
             bullet.die()
             tank.die()
+
+    def check_tank_collisions(self):
+        tank_and_tank = self.detect_collisions(TANK, TANK)
+
+        for c in tank_and_tank:
+            tank1 = c[0]
+            tank2 = c[1]
+            tank1.die()
+            tank2.die()
