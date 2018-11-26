@@ -10,8 +10,8 @@ class Tank(Thing):
     rotations[DOWN] = pygame.transform.rotate(rotations[UP], 180)
     rotations[RIGHT] = pygame.transform.rotate(rotations[UP], 270)
 
-    def __init__(self):
-        Thing.__init__(self)
+    def __init__(self, speed = Thing.DEFAULT_SPEED):
+        Thing.__init__(self, speed)
         self.rect = self.get_image().get_rect();
         
     def handle_out_of_bounds(self, screen_rect):

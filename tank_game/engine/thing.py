@@ -5,12 +5,12 @@ from constants import UP, DOWN, LEFT, RIGHT
 class Thing(object):
     DEFAULT_SPEED = 10  # pixels/frame
 
-    def __init__(self):
+    def __init__(self, speed = DEFAULT_SPEED):
         self.speeds = {}
-        self.speeds[UP] = [0, -self._speed()]
-        self.speeds[DOWN] = [0, self._speed()]
-        self.speeds[LEFT] = [-self._speed(), 0]
-        self.speeds[RIGHT] = [self._speed(), 0]
+        self.speeds[UP] = [0, -speed]
+        self.speeds[DOWN] = [0, speed]
+        self.speeds[LEFT] = [-speed, 0]
+        self.speeds[RIGHT] = [speed, 0]
 
         self.alive = True
         self.direction = None
@@ -20,9 +20,6 @@ class Thing(object):
         self.place_at((0, 0))
         self.turn_to(UP)
         self.speed = None
-
-    def _speed(self):
-        return Thing.DEFAULT_SPEED
 
     def place_at(self, center):
         self.rect.center = center

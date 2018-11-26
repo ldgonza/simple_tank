@@ -45,6 +45,13 @@ class GameEngine(object):
         for ticker in self.tickers:
             ticker.tick(ms)
 
+        old_tickers = self.tickers[:]
+        self.tickers = []
+        # cleanup
+        for ticker in old_tickers:
+            if ticker.is_alive():
+                self.tickers.append(ticker)
+
     def do_events(self, event_checker):
         if self.event_checker.quit:
             self.alive = False

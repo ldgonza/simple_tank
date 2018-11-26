@@ -1,6 +1,7 @@
 from .engine.game_engine import GameEngine
 from .engine.event_ticker import EventTicker
 from .engine.constants import UP, DOWN, LEFT, RIGHT
+from .engine.thing import Thing
 from tank_game_event_checker import TankGameEventChecker
 from tank import Tank
 from bullet import Bullet
@@ -10,17 +11,17 @@ from tank_game_categories import PLAYER, TANK, BULLET
 
 class TankGameEngine(GameEngine):
     MAX_BULLETS = 3
-    MAX_TANKS = 5
+    MAX_TANKS = 2
 
     def __init__(self, screen):
         GameEngine.__init__(self, screen, TankGameEventChecker())
 
-        tank = self.add_tank((400, 300))
+        tank = self.add_tank((400, 300), add_tickers=False)
         tank.categories.append(PLAYER)
 
-        ticker = EventTicker(1000, lambda: self.spawn_tank_controller())
-        self.spawn_tank_ticker = ticker
-        self.add_ticker(ticker)
+        self.add_ticker(EventTicker(
+            1000,
+            lambda ticker: self.spawn_tank_controller(ticker)))
 
     def bullet_count(self):
         return self.count(BULLET)
@@ -36,11 +37,21 @@ class TankGameEngine(GameEngine):
 
         return count
 
-    def add_tank(self, pos):
-        tank = Tank()
+    def add_tank(self, pos, add_tickers = True, speed = Thing.DEFAULT_SPEED):
+        tank = Tank(speed)
         tank.place_at(pos)
         tank.categories.append(TANK)
         self.entities.append(tank)
+
+        if add_tickers:
+            self.add_ticker(EventTicker(
+                0,
+                lambda ticker: self.tank_move_controller(tank, ticker)))
+
+            self.add_ticker(EventTicker(
+                0,
+                lambda ticker: self.tank_shoot_controller(tank, ticker)))
+
         return tank
 
     def can_shoot(self):
@@ -106,11 +117,48 @@ class TankGameEngine(GameEngine):
     # if there's no more than a set number of tanks already there
     def spawn_tank(self):
         if self.tank_count() < TankGameEngine.MAX_TANKS:
-            self.add_tank(self.get_random_pos())
+            self.add_tank(self.get_random_pos(), speed=Thing.DEFAULT_SPEED/3)
 
-    def spawn_tank_controller(self):
+    def spawn_tank_controller(self, ticker):
         self.spawn_tank()
-        self.spawn_tank_ticker.reset(random.uniform(500, 1500))
+        ticker.reset(random.uniform(500, 1500))
+
+    def tank_move_controller(self, tank, ticker):
+        if not tank.is_alive():
+            ticker.die()
+        else:
+            chance = random.uniform(0, 100)
+            if(chance > 50):
+                # Point to player
+                viable_directions = list()
+                player = self.get_player()
+
+                if tank.pos[1] >= player.pos[1]:
+                    viable_directions.append(UP)
+                else:
+                    viable_directions.append(DOWN)
+
+                if tank.pos[0] >= player.pos[0]:
+                    viable_directions.append(LEFT)
+                else:
+                    viable_directions.append(RIGHT)
+
+                tank.turn_to(viable_directions[int(random.uniform(0, len(viable_directions)))])
+            elif chance > 25:
+                # Point somewhere random
+                tank.turn_to(int(random.uniform(0, 3)))
+
+            else:
+                # Stop
+                tank.stop()
+
+            ticker.reset(random.uniform(0, 1000))
+
+    def tank_shoot_controller(self, tank, ticker):
+        if not tank.is_alive():
+            ticker.die()
+        else:
+            pass
 
     def check_collisions(self):
         self.check_bullet_collisions()
