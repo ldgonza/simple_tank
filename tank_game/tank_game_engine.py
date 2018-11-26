@@ -10,8 +10,8 @@ from tank_game_categories import PLAYER, TANK, BULLET
 
 
 class TankGameEngine(GameEngine):
-    MAX_BULLETS = 3
-    MAX_TANKS = 2
+    MAX_BULLETS_PER_TANK = 3
+    MAX_TANKS = 5
 
     def __init__(self, screen):
         GameEngine.__init__(self, screen, TankGameEventChecker())
@@ -23,19 +23,27 @@ class TankGameEngine(GameEngine):
             1000,
             lambda ticker: self.spawn_tank_controller(ticker)))
 
-    def bullet_count(self):
-        return self.count(BULLET)
+    def bullet_count(self, tank):
+        count = 0
+        for b in self.get_all(BULLET):
+            if b.tank is tank:
+                count += 1
+
+        return count
 
     def tank_count(self):
         return self.count(TANK)
 
     def count(self, category):
-        count = 0
+        return len(self.get_all(category))
+
+    def get_all(self, category):
+        result = []
         for e in self.entities.all():
             if category in e.categories:
-                count += 1
+                result.append(e)
 
-        return count
+        return result
 
     def add_tank(self, pos, add_tickers = True, speed = Thing.DEFAULT_SPEED):
         tank = Tank(speed)
@@ -54,11 +62,6 @@ class TankGameEngine(GameEngine):
 
         return tank
 
-    def can_shoot(self):
-        not_at_bullet_cap = self.bullet_count() < TankGameEngine.MAX_BULLETS
-        want_to_shoot = self.event_checker.shooting
-        return want_to_shoot and not_at_bullet_cap
-
     def do_events(self, event_checker):
         GameEngine.do_events(self, event_checker)
 
@@ -67,30 +70,9 @@ class TankGameEngine(GameEngine):
         else:
             self.get_player().turn_to(event_checker.direction)
 
-        if self.can_shoot():
-            bullet = Bullet()
-            bullet.categories.append(BULLET)
-
-            pos = self.get_player().rect.center
-            delta = 30
-
-            if(self.get_player().direction == LEFT):
-                pos = (pos[0] - delta, pos[1])
-
-            if(self.get_player().direction == RIGHT):
-                pos = (pos[0] + delta, pos[1])
-
-            if(self.get_player().direction == UP):
-                pos = (pos[0], pos[1] - delta)
-
-            if(self.get_player().direction == DOWN):
-                pos = (pos[0], pos[1] + delta)
-
-            bullet.place_at(pos)
-            bullet.turn_to(self.get_player().direction)
-
-            self.entities.append(bullet)
-
+        if self.event_checker.shooting:
+            self.do_shoot(self.get_player())
+            
         self.check_collisions()
 
         # Game over
@@ -98,6 +80,35 @@ class TankGameEngine(GameEngine):
             print("GAME OVER")
             self.alive = False
 
+    def do_shoot(self, tank):
+        is_at_bullet_cap = self.bullet_count(tank) >= TankGameEngine.MAX_BULLETS_PER_TANK
+        if is_at_bullet_cap:
+            return
+        
+        bullet = Bullet()
+        bullet.tank = tank
+        bullet.categories.append(BULLET)
+
+        pos = tank.rect.center
+        delta = 30
+
+        if(tank.direction == LEFT):
+            pos = (pos[0] - delta, pos[1])
+
+        if(tank.direction == RIGHT):
+            pos = (pos[0] + delta, pos[1])
+
+        if(tank.direction == UP):
+            pos = (pos[0], pos[1] - delta)
+
+        if(tank.direction == DOWN):
+            pos = (pos[0], pos[1] + delta)
+
+        bullet.place_at(pos)
+        bullet.turn_to(tank.direction)
+
+        self.entities.append(bullet)
+            
     def get_player(self):
         for e in self.entities.all():
             if PLAYER in e.categories:
@@ -158,7 +169,9 @@ class TankGameEngine(GameEngine):
         if not tank.is_alive():
             ticker.die()
         else:
-            pass
+            self.do_shoot(tank)
+
+        ticker.reset(random.uniform(0, 1000))
 
     def check_collisions(self):
         self.check_bullet_collisions()
